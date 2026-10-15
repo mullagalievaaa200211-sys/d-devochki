@@ -114,6 +114,7 @@ button{font-family:inherit}
 .msgp{background:var(--greenS);color:var(--ink);border-radius:14px 14px 4px 14px;padding:10px 12px;font-size:13px;line-height:1.45}
 .msgp i{display:block;font-style:normal;font-size:11px;color:var(--green);font-weight:800;margin-bottom:3px}
 @media (max-width:1100px){.side{grid-template-columns:1fr}}
+.mtabs{display:flex;gap:6px;padding:10px 14px 0;overflow-x:auto}.mtabs button{flex:0 0 auto;min-height:36px;padding:0 12px;border-radius:999px;border:1.5px solid #DCD8E1;background:#fff;font-size:13px;font-weight:800;cursor:pointer;color:var(--ink)}.mtabs button.on{background:var(--pink);border-color:var(--pink);color:#fff}.cal7{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}.cal7 .wd{font-size:11px;color:var(--muted);text-align:center;font-weight:700}.cal7 button{aspect-ratio:1;border-radius:10px;border:1.5px solid #E3DEE7;background:#fff;font-weight:800;font-size:13px;cursor:pointer;color:var(--ink)}.cal7 button.on{background:var(--pink);border-color:var(--pink);color:#fff}.cal7 button:disabled{cursor:default;opacity:.85}
 </style>
 </head>
 <body><div style="position:sticky;top:0;z-index:99999;background:#E6338F;color:#fff;font:600 14px/1.4 Arial,sans-serif;text-align:center;padding:8px 12px">Демо-концепт для D-devochki от Илиды · не официальный сайт студии · записи и оплаты здесь не принимаются</div>
@@ -704,6 +705,9 @@ render();
 /* ===== мастер ===== */
 let view='a',mi=1;const chairNext={},trendSent={v:false};
 const NOTES={'Ирина':'Любит молочные оттенки, с салоном год','Дарья':'Мани+педи в 4 руки с подругой по пятницам','Вероника':'Второй визит. Спрашивала про осенний дизайн','Катя':'Готовится к свадьбе в ноябре','Оля':'Чувствительные глаза — клей без запаха','Лена':'Хочет эффект «лисий взгляд»','Маша':'Первый раз на брови','Аня':'Ламинирование раз в 6 недель','Новая клиентка':'Новенькая с сайта, пришла с Яндекс Карт. Расскажи про бронь следующего визита — бонус твой'};
+let mtab='day';const schedSent={v:false};const schedDays=new Set([2,3,4,6,7,9,10,11,13,14,16,17,18,20,21,23,24,25,27,28]);
+const UPC=[['Завтра, 10:00','Ирина','Маникюр с покрытием · Московская, 18',0],['Завтра, 13:00','Алина','Маникюр + дизайн · Роз, 113',1],['Пт, 16 · 11:30','Ксения','Френч · Московская, 18',2],['Пт, 16 · 15:00','Вика','Укрепление + покрытие · Роз, 113',0]];
+function stBadge(k){const S=[['✓ подтвердила','var(--green)','var(--greenS)'],['⏳ ждём ответа','#8A5A00','#FFF1D6'],['↻ перенесла','#5E5966','#EEEBF1']][k];return `<span style="font-size:11px;font-weight:800;color:${S[1]};background:${S[2]};padding:3px 8px;border-radius:999px;white-space:nowrap">${S[0]}</span>`;}
 function renderMaster(){
  const M=MASTERS[mi];
  const my=[];(base[0]||[]).forEach(a=>{if(a[0]===mi)my.push({s:a[1],d:a[2],name:a[3],svc:a[4],addr:BR[1+a[5]],kind:'ok'});});
@@ -713,20 +717,31 @@ function renderMaster(){
  $('mview').innerHTML=`<div class="mwrap">
  <div class="mphone"><div class="mscr">
  <div class="mtop"><span style="font-size:12px;color:#CFCBD6">среда, 14 октября · D-devochki</span><h2>Привет, ${M[0]} 💗</h2><span style="font-size:13px;color:#CFCBD6">Сегодня ${my.length} ${my.length===1?'клиентка':my.length<5?'клиентки':'клиенток'} · ${M[1]}</span></div>
- <div class="msec"><h3>Мой день</h3>${my.length?my.map((a,i)=>{const k=mi+'|'+a.s;const dn=!!chairNext[k];return `<div class="mc${a.kind==='new'?' new':''}"><div class="mrow"><b style="font-size:15px">${fmt(a.s)} · ${a.name}</b>${a.kind==='new'?'<span style="font-size:11px;font-weight:800;color:var(--pink)">новая · с сайта</span>':''}</div><span style="font-size:13px;color:var(--muted)">${a.svc} · ${a.addr}</span><div class="mnote">ИИ помнит: ${NOTES[a.name]||'—'}</div><button type="button" class="mbtn${dn?' done':''}" data-k="${k}">${dn?'Следующий визит забронирован · +бонус':'Предложить следующий визит через 3 недели'}</button></div>`}).join(''):'<div class="mc"><span style="font-size:13px;color:var(--muted)">Сегодня записей нет</span></div>'}</div>
- <div class="msec"><h3>Мои бонусы за октябрь</h3><div class="bonus">
+<div class="mtabs">${[["day","Мой день"],["rec","Записи"],["sched","График"],["bonus","Бонусы"]].map(t=>`<button type="button" data-t="${t[0]}" class="${mtab===t[0]?"on":""}">${t[1]}</button>`).join("")}</div>
+${mtab==='day'?` <div class="msec"><h3>Мой день</h3>${my.length?my.map((a,i)=>{const k=mi+'|'+a.s;const dn=!!chairNext[k];return `<div class="mc${a.kind==='new'?' new':''}"><div class="mrow"><b style="font-size:15px">${fmt(a.s)} · ${a.name}</b>${stBadge(a.kind==='new'?0:(i%3))}${a.kind==='new'?'<span style="font-size:11px;font-weight:800;color:var(--pink)">новая · с сайта</span>':''}</div><span style="font-size:13px;color:var(--muted)">${a.svc} · ${a.addr}</span><div class="mnote">ИИ помнит: ${NOTES[a.name]||'—'}</div><button type="button" class="mbtn${dn?' done':''}" data-k="${k}">${dn?'Следующий визит забронирован · +бонус':'Предложить следующий визит через 3 недели'}</button></div>`}).join(''):'<div class="mc"><span style="font-size:13px;color:var(--muted)">Сегодня записей нет</span></div>'}</div>`:''}
+${mtab==='rec'?`<div class="msec"><h3>Ближайшие записи</h3>${UPC.map(u=>`<div class="mc"><div class="mrow"><b style="font-size:14px">${u[0]} · ${u[1]}</b>${stBadge(u[3])}</div><span style="font-size:13px;color:var(--muted)">${u[2]}</span>${u[3]===1?'<span style="font-size:12px;color:var(--muted)">Система напомнила вчера в 12:00 · напомнит ещё раз за 3 часа</span>':''}${u[3]===2?'<span style="font-size:12px;color:var(--muted)">Перенесла сама через бота — окно уже снова в продаже</span>':''}</div>`).join('')}
+<div class="mc" style="background:var(--dark);color:#fff"><span style="font-size:13px;line-height:1.45">Статус обновляется сам: клиентка нажимает «Подтвердить» или «Перенести» в своём мессенджере</span></div></div>`:''}
+${mtab==='sched'?`<div class="msec"><h3>Мой график · ноябрь</h3><span style="font-size:13px;color:var(--muted);line-height:1.45">Отметь рабочие дни — админ получит график, и окна сразу откроются для записи</span>
+<div class="cal7">${["пн","вт","ср","чт","пт","сб","вс"].map(d=>`<span class="wd">${d}</span>`).join("")}${Array(6).fill('<span></span>').join("")}${Array.from({length:30},(_,k)=>k+1).map(d=>`<button type="button" data-day="${d}" class="${schedDays.has(d)?"on":""}" ${schedSent.v?"disabled":""}>${d}</button>`).join("")}</div>
+<span style="font-size:13px"><b>${schedDays.size}</b> рабочих дней · 10:00–20:00</span>
+${schedSent.v?'<div class="mc" style="background:var(--greenS)"><b style="font-size:14px;color:var(--green)">✓ Отправлено администратору</b><span style="font-size:12px;color:var(--muted)">Админ подтвердил · окна на ноябрь открыты на сайте</span><button type="button" class="mbtn" id="schedEdit">Изменить график</button></div>':'<button type="button" class="mbtn" id="schedSend" style="background:var(--pink);color:#fff">Отправить администратору</button>'}</div>`:''}
+${mtab==='bonus'?` <div class="msec"><h3>Мои бонусы за октябрь</h3><div class="bonus">
  <div><b>6 из 10</b><span>новеньких вернулись второй раз — бонус за «своих клиенток»</span></div>
  <div><b>${11+chairs}</b><span>броней следующего визита прямо в кресле</span></div>
  </div></div>
  <div class="msec"><h3>Общая цель студии</h3><div class="mc"><div class="mrow"><b style="font-size:14px">Утренние окна заполнены</b><b style="font-size:14px;color:var(--pink)">68% / 80%</b></div><div class="bar2"><b style="width:85%"></b></div><span style="font-size:12px;color:var(--muted)">Дотянем до 80% — девичник всей командой в конце месяца 🥂</span></div></div>
  <div class="msec"><h3>Тренд месяца</h3><div class="mc"><span style="font-size:13px;line-height:1.45">Предложи свой дизайн на ноябрь. Лучший попадёт на главную в «Что носят девочки», а тебе — процент с каждой записи «хочу такой»</span><button type="button" class="mbtn${trendSent.v?' done':''}" id="trendBtn">${trendSent.v?'Дизайн отправлен — ждём голосования':'Загрузить фото дизайна'}</button></div></div>
- <div class="msec" style="padding-bottom:18px"><h3>Мастер недели</h3><div class="mc" style="background:var(--dark);color:#fff"><b style="font-size:14px">Твоя неделя на главной: 21–27 октября</b><span style="font-size:12px;color:#CFCBD6">Заполни анкету: фирменное, хобби, пара слов о себе — и твоя карточка будет первой</span></div></div>
+ <div class="msec" style="padding-bottom:18px"><h3>Мастер недели</h3><div class="mc" style="background:var(--dark);color:#fff"><b style="font-size:14px">Твоя неделя на главной: 21–27 октября</b><span style="font-size:12px;color:#CFCBD6">Заполни анкету: фирменное, хобби, пара слов о себе — и твоя карточка будет первой</span></div></div>`:''}
  </div></div>
  <div class="mpick card"><b style="font-size:14px">Чей экран показать</b><select id="msel">${MASTERS.map((m,i)=>`<option value="${i}" ${i===mi?'selected':''}>${m[0]} — ${m[1]}</option>`).join('')}</select><span style="font-size:13px;color:var(--muted);line-height:1.45"><span class="lefthint">Запишитесь слева к этому мастеру на сегодня — запись появится у неё в «Моём дне» с пометкой «новая · с сайта»</span></span></div>
  </div>`;
  document.querySelectorAll('#mview .mbtn[data-k]').forEach(b=>b.onclick=()=>{const k=b.dataset.k;if(chairNext[k])return;chairNext[k]=1;pushFeed(`<b>${M[0]} забронировала клиентке следующий визит</b>прямо в кресле · через 3 недели`);renderMaster();});
- $('trendBtn').onclick=()=>{if(trendSent.v)return;trendSent.v=true;pushFeed(`<b>${M[0]} предложила дизайн месяца</b>на голосование для рубрики «Что носят девочки»`);renderMaster();};
+ if($('trendBtn'))$('trendBtn').onclick=()=>{if(trendSent.v)return;trendSent.v=true;pushFeed(`<b>${M[0]} предложила дизайн месяца</b>на голосование для рубрики «Что носят девочки»`);renderMaster();};
  $('msel').onchange=e=>{mi=+e.target.value;renderMaster();};
+  document.querySelectorAll('#mview .mtabs button').forEach(b=>b.onclick=()=>{mtab=b.dataset.t;renderMaster();});
+  document.querySelectorAll('#mview .cal7 button[data-day]').forEach(b=>b.onclick=()=>{const d=+b.dataset.day;schedDays.has(d)?schedDays.delete(d):schedDays.add(d);renderMaster();});
+  if($('schedSend'))$('schedSend').onclick=()=>{schedSent.v=true;pushFeed(`<b>${M[0]} отправила график на ноябрь</b>${schedDays.size} рабочих дней · окна открыты на сайте`);renderMaster();};
+  if($('schedEdit'))$('schedEdit').onclick=()=>{schedSent.v=false;renderMaster();};
 }
 
 
