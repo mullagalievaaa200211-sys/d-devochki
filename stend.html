@@ -780,5 +780,5 @@ document.querySelectorAll('#view button').forEach(b=>b.onclick=()=>{view=b.datas
 
 const _r=render;render=function(){_r();if(view==='m')renderMaster();};
 </script>
-</body>
+<script>(function(){var m={admin:'d',calendar:'a',master:'m',owner:'o'};var v=m[(location.hash||'').slice(1)];if(v){var b=document.querySelector('#view button[data-v="'+v+'"]');if(b)b.click();}})();</script></body>
 </html>
