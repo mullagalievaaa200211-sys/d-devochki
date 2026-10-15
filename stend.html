@@ -780,5 +780,14 @@ document.querySelectorAll('#view button').forEach(b=>b.onclick=()=>{view=b.datas
 
 const _r=render;render=function(){_r();if(view==='m')renderMaster();};
 </script>
-<script>(function(){var m={admin:'d',calendar:'a',master:'m',owner:'o'};var v=m[(location.hash||'').slice(1)];if(v){var b=document.querySelector('#view button[data-v="'+v+'"]');if(b)b.click();}})();</script></body>
+<script>(function(){
+var R={admin:{t:'Администратор',v:['d','a'],d:'d'},master:{t:'Мастер',v:['m'],d:'m'},owner:{t:'Владелица',v:['o','a'],d:'o'}};
+var r=R[(location.hash||'').slice(1)];if(!r)return;
+var st=document.createElement('style');st.textContent='.wrap>div:first-child{display:none!important}.admin{flex:1 1 100%!important;max-width:1200px;margin:0 auto}';document.head.appendChild(st);
+var top=document.querySelector('.top');top.innerHTML='<b>Вход: '+r.t+'</b><span>демо-данные</span><a href="index.html" style="margin-left:auto;color:#F49AC8;font-weight:800;text-decoration:none">← Сменить роль</a>';
+document.querySelectorAll('#view button').forEach(function(b){if(r.v.indexOf(b.dataset.v)<0)b.style.display='none';});
+if(r.v.length<2)document.getElementById('view').style.display='none';
+var b=document.querySelector('#view button[data-v="'+r.d+'"]');if(b)b.click();
+document.title='D-devochki — '+r.t+' (демо)';
+})();</script></body>
 </html>
